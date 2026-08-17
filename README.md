@@ -3,7 +3,7 @@
 Projeto desenvolvido para a disciplina de Requisitos e Modelagem de Sistemas T193 | Atividade Prática: Desenvolvimento Guiado por Requisitos (Spec-Driven Development)
 
 Professor: Marcelo Bezerra de Alcantara
--- EQUIPE:
+## EQUIPE:
 Nicholas Marques Alves
 Ycaro Vieira Lopes
 Diego Alexander Silva de Araujo
