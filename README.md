@@ -1,6 +1,6 @@
 # Jogo da Velha Web - UNIFOR
 
-Projeto desenvolvido para a disciplina de Requisitos e Modelagem de Sistemas T193 | Atividade Prática: Desenvolvimento Guiado por Requisitos (Spec-Driven Development)
+Projeto desenvolvido para a disciplina de Requisitos e Modelagem de Sistemas T193 | Atividade Prática: Desenvolvimento Guiado por Requisitos pré-solicitados que se encontram em docs/cdu_JogarJogodavelha.md (Spec-Driven Development)
 Professor: Marcelo Bezerra de Alcantara
 ## EQUIPE:
 - Nicholas Marques Alves : Matrícula: 2612708
