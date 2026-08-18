@@ -16,7 +16,7 @@ Professor: Marcelo Bezerra de Alcantara
 * **Reiniciar Partida:** Clique no botão **REINICIAR JOGO** a qualquer momento para zerar o placar e reiniciar o tabuleiro.
 
 ## 🚀 Aplicação Online (GitHub Pages)
-👉 **[Acesse o jogo rodando aqui](https://github.com/niclasmn/jogo-da-velha/blob/main/src/index.html)**
+👉 **[Acesse o jogo rodando aqui](https://niclasmn.github.io/jogo-da-velha/src/)**
 
 ## 📁 Estrutura do Repositório
 - `/docs`: Contém a especificação formal do Caso de Uso (`cdu_JogarJogodavelha.md`).
