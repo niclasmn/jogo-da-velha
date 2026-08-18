@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha - UNIFOR</title>
+    <!-- Fontes pré-carregadas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@600;700;800;900&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Biblioteca para efeito de confete -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f1f4f9;
+            --azul-unifor: #003366;
+            --azul-destaque: #004b93;
+            --laranja-unifor: #d97706;
+            --verde-vitoria: #16a34a;
+            --texto-dark: #0f172a;
+            --card-bg: #ffffff;
+            --cell-bg: #f8fafc;
+            --border-light: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--texto-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            gap: 12px;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 51, 102, 0.06);
+            padding: 24px 28px 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Botão de Ajuda e Balão Expansível */
+        .help-container {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .btn-help {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background-color: #a0aec0;
+            color: #ffffff;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.8;
+            transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-help:hover {
+            opacity: 1;
+            background-color: #718096;
+            transform: scale(1.08);
+        }
+
+        .help-balloon {
+            position: absolute;
+            top: 34px;
+            right: 0;
+            width: 290px;
+            background-color: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+            padding: 0 16px;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, padding 0.35s ease;
+            pointer-events: none;
+        }
+
+        .help-balloon * {
+            font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .help-balloon h3 {
+            font-size: 0.85rem;
+            color: var(--azul-unifor);
+            margin-bottom: 6px;
+            font-weight: 800;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .help-balloon::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+        .help-balloon .balloon-content {
+            opacity: 0;
+            transition: opacity 0.2s ease 0.25s;
+        }
+
+        .help-balloon.active {
+            max-height: 520px;
+            opacity: 1;
+            padding: 16px;
+            pointer-events: auto;
+        }
+
+        .help-balloon.active .balloon-content {
+            opacity: 1;
+        }
+
+        .help-balloon p, .help-balloon ul {
+            font-size: 0.75rem;
+            color: #475569;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .help-balloon ul {
+            padding-left: 16px;
+            margin-bottom: 0;
+        }
+
+        .help-balloon .divider {
+            height: 1px;
+            background-color: var(--border-light);
+            margin: 8px 0;
+        }
+
+        .nobreak {
+            white-space: nowrap;
+        }
+
+        /* Cabeçalho */
+        header {
+            text-align: center;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 10px;
+            padding-top: 0;
+        }
+
+        .subtitle {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+            color: var(--azul-destaque);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        h1 {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 1.85rem;
+            color: var(--azul-unifor);
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin-top: 2px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        /* Controles de Seleção */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .control-group label {
+            font-size: 0.65rem;
+            color: #64748b;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        select {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            width: 100%;
+            padding: 8px 24px 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            background-color: var(--cell-bg);
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c003366' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 14px;
+        }
+
+        select:focus, select:hover {
+            border-color: #cbd5e1;
+            background-color: #f1f5f9;
+        }
+
+        /* Painel de Placar Fixo */
+        .scoreboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            align-items: center;
+            background-color: var(--cell-bg);
+            border: 1px solid var(--border-light);
+            padding: 8px 12px;
+            border-radius: 12px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .score-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .score-box.player-x .label { color: var(--azul-unifor); }
+        .score-box.player-o .label { color: var(--laranja-unifor); }
+
+        .score-box .label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .score-box .value {
+            font-size: 1.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-top: 2px;
+        }
+
+        .round-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            border-left: 1px solid var(--border-light);
+            border-right: 1px solid var(--border-light);
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .round-box .label {
+            font-size: 0.65rem;
+            color: #64748b;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .round-box .value {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--texto-dark);
+            margin-top: 2px;
+        }
+
+        /* Status do Jogo */
+        .status-msg {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: 900;
+            font-size: 0.95rem;
+            color: var(--azul-unifor);
+            min-height: 2.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            word-break: break-word;
+            padding: 0 4px;
+        }
+
+        .status-msg.blink-victory {
+            animation: fastPulseBlue 0.3s infinite alternate cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        @keyframes fastPulseBlue {
+            0% {
+                color: var(--azul-unifor);
+                transform: scale(1);
+            }
+            100% {
+                color: var(--azul-destaque);
+                transform: scale(1.03);
+            }
+        }
+
+        /* Tabuleiro & Células */
+        .board-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .cell {
+            background-color: var(--cell-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: 900;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .cell:hover:not(.disabled) {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .cell.disabled {
+            cursor: not-allowed;
+        }
+
+        .cell.x-symbol { color: var(--azul-unifor); }
+        .cell.o-symbol { color: var(--laranja-unifor); }
+
+        .cell.winner-highlight {
+            background-color: #e2e8f0;
+            border-color: #cbd5e1;
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            z-index: 5;
+        }
+
+        /* Linha de vitória */
+        .winning-line {
+            position: absolute;
+            background-color: var(--verde-vitoria);
+            height: 6px;
+            border-radius: 3px;
+            transform-origin: center left;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        /* Botão Reiniciar */
+        .btn-reset {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--azul-unifor);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        .btn-reset:hover {
+            background-color: var(--azul-destaque);
+        }
+
+        .btn-reset:active {
+            transform: scale(0.98);
+        }
+
+        /* Texto de Rodapé Fora do Card (@2026) */
+        .footer-year {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* Responsividade */
+        @media (max-width: 380px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .score-box .label, .round-box .label {
+                font-size: 0.58rem;
+            }
+
+            .score-box .value {
+                font-size: 1.3rem;
+            }
+
+            .round-box .value {
+                font-size: 1rem;
+            }
+
+            .status-msg {
+                font-size: 0.85rem;
+            }
+
+            select {
+                font-size: 0.75rem;
+                padding: 6px 18px 6px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- BOTÃO DE AJUDA E BALÃO INFORMATIVO -->
+        <div class="help-container">
+            <button class="btn-help" id="btnHelp" aria-label="Ajuda">?</button>
+            <div class="help-balloon" id="helpBalloon">
+                <div class="balloon-content">
+                    <h3>Jogo da Velha</h3>
+                    <p>Projeto produzido para a disciplina de Requisitos e Mod de Sistemas</p>
+                    <p><strong>Ministrada por:</strong> Prof. Marcelo Bezerra</p>
+                    <div class="divider"></div>
+                    <p><strong>EQUIPE:</strong></p>
+                    <p>Nicholas Marques Alves<br>
+                       Ycaro Vieira Lopes Diego<br>
+                       Alexander Silva de Araujo<br>
+                       Charles Targino Pacheco</p>
+                    <div class="divider"></div>
+                    <p><strong>Como jogar?</strong></p>
+                    <ul>
+                        <li>Escolha jogar contra um amigo (PVP) ou contra o Computador.</li>
+                        <li>Defina se a partida é única ou um torneio Melhor de 3 (MD3).</li>
+                        <li>Clique em uma casa do tabuleiro para fazer sua jogada. O primeiro a jogar sempre usa o símbolo <strong>X</strong>.</li>
+                        <li>Alinhe 3 símbolos iguais na horizontal, vertical ou diagonal para vencer a rodada!</li>
+                    </ul>
+                    <div class="divider"></div>
+                    <p>Engenharia de Prompt em Gemini 3.6 Flash e Gemini 3.6 Thinking feita por <span class="nobreak">Nicholas Marques Alves</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CABEÇALHO -->
+        <header>
+            <div class="subtitle">UNIVERSIDADE DE FORTALEZA</div>
+            <h1>JOGO DA VELHA</h1>
+        </header>
+
+        <!-- CONTROLES DE SELEÇÃO -->
+        <div class="controls">
+            <div class="control-group">
+                <label for="modeSelect">Modo de Jogo</label>
+                <select id="modeSelect">
+                    <option value="pvp">2 Jogadores (PVP)</option>
+                    <option value="cpu">Contra o Computador</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="formatSelect">Formato</label>
+                <select id="formatSelect">
+                    <option value="single">Partida Única</option>
+                    <option value="bo3">Melhor de 3 (MD3)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- PLACAR E RODADAS -->
+        <div class="scoreboard">
+            <div class="score-box player-x">
+                <div class="label" id="labelPlayerX">JOGADOR X</div>
+                <div class="value" id="winsX">0</div>
+            </div>
+            <div class="round-box">
+                <div class="label">RODADA</div>
+                <div class="value" id="currentRound">1/1</div>
+            </div>
+            <div class="score-box player-o">
+                <div class="label" id="labelPlayerO">JOGADOR O</div>
+                <div class="value" id="winsO">0</div>
+            </div>
+        </div>
+
+        <!-- MENSAGEM DE STATUS -->
+        <div class="status-msg" id="statusMsg">VEZ DO JOGADOR X</div>
+
+        <!-- TABULEIRO E OVERLAY DA LINHA -->
+        <div class="board-container">
+            <div class="board" id="board">
+                <div class="cell" data-index="0"></div>
+                <div class="cell" data-index="1"></div>
+                <div class="cell" data-index="2"></div>
+                <div class="cell" data-index="3"></div>
+                <div class="cell" data-index="4"></div>
+                <div class="cell" data-index="5"></div>
+                <div class="cell" data-index="6"></div>
+                <div class="cell" data-index="7"></div>
+                <div class="cell" data-index="8"></div>
+            </div>
+            <div class="winning-line" id="winningLine"></div>
+        </div>
+
+        <!-- BOTÃO REINICIAR -->
+        <button class="btn-reset" id="btnReset">REINICIAR JOGO</button>
+    </div>
+
+    <!-- ANO DE FABRICAÇÃO (FORA DO CARD BRANCO) -->
+    <div class="footer-year">@2026</div>
+
+    <!-- LÓGICA DE NEGÓCIO E SINTETIZADOR DE ÁUDIO -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            let options = ['', '', '', '', '', '', '', '', ''];
+            let currentPlayer = 'X';
+            let running = true;
+            let winsX = 0;
+            let winsO = 0;
+            let currentRound = 1;
+            let modeSelect = 'pvp';
+            let formatSelect = 'single';
+
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            const cells = document.querySelectorAll('.cell');
+            const statusMsg = document.getElementById('statusMsg');
+            const winsXEl = document.getElementById('winsX');
+            const winsOEl = document.getElementById('winsO');
+            const currentRoundEl = document.getElementById('currentRound');
+            const labelPlayerOEl = document.getElementById('labelPlayerO');
+            const selectModeEl = document.getElementById('modeSelect');
+            const selectFormatEl = document.getElementById('formatSelect');
+            const btnResetEl = document.getElementById('btnReset');
+            const winningLineEl = document.getElementById('winningLine');
+            const boardContainerEl = document.querySelector('.board-container');
+            
+            const btnHelpEl = document.getElementById('btnHelp');
+            const helpBalloonEl = document.getElementById('helpBalloon');
+
+            btnHelpEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                helpBalloonEl.classList.toggle('active');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!helpBalloonEl.contains(e.target) && e.target !== btnHelpEl) {
+                    helpBalloonEl.classList.remove('active');
+                }
+            });
+
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            let audioCtx = null;
+
+            function initAudio() {
+                if (!audioCtx) {
+                    audioCtx = new AudioContext();
+                }
+            }
+
+            function playSound(type) {
+                initAudio();
+                if (!audioCtx) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'X') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'O') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(329.63, now);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'win') {
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.frequency.setValueAtTime(freq, now + (idx * 0.08));
+                        g.gain.setValueAtTime(0.1, now + (idx * 0.08));
+                        g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                        o.start(now + (idx * 0.08));
+                        o.stop(now + 0.5);
+                    });
+                } else if (type === 'draw') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.4);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                }
+            }
+
+            initGame();
+
+            cells.forEach(cell => cell.addEventListener('click', cellClicked));
+            btnResetEl.addEventListener('click', resetAll);
+            selectModeEl.addEventListener('change', handleConfigChange);
+            selectFormatEl.addEventListener('change', handleConfigChange);
+
+            function initGame() {
+                options = ['', '', '', '', '', '', '', '', ''];
+                currentPlayer = 'X';
+                running = true;
+
+                statusMsg.classList.remove('blink-victory');
+
+                cells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('x-symbol', 'o-symbol', 'disabled', 'winner-highlight');
+                });
+
+                hideWinningLine();
+                updateStatusText();
+                updateRoundDisplay();
+            }
+
+            function handleConfigChange() {
+                modeSelect = selectModeEl.value;
+                formatSelect = selectFormatEl.value;
+                labelPlayerOEl.textContent = (modeSelect === 'cpu') ? 'COMPUTADOR' : 'JOGADOR O';
+                resetAll();
+            }
+
+            function resetAll() {
+                winsX = 0;
+                winsO = 0;
+                currentRound = 1;
+                winsXEl.textContent = '0';
+                winsOEl.textContent = '0';
+                initGame();
+            }
+
+            function cellClicked() {
+                const index = this.getAttribute('data-index');
+
+                if (options[index] !== '' || !running) {
+                    return;
+                }
+
+                makeMove(this, index);
+
+                if (running && modeSelect === 'cpu' && currentPlayer === 'O') {
+                    running = false;
+                    statusMsg.textContent = 'COMPUTADOR PENSANDO...';
+
+                    setTimeout(() => {
+                        cpuMakeMove();
+                    }, 400);
+                }
+            }
+
+            function makeMove(cellEl, index) {
+                options[index] = currentPlayer;
+                cellEl.textContent = currentPlayer;
+                cellEl.classList.add(currentPlayer === 'X' ? 'x-symbol' : 'o-symbol', 'disabled');
+
+                playSound(currentPlayer);
+
+                checkWinner();
+            }
+
+            function cpuMakeMove() {
+                const emptyIndices = options
+                    .map((val, idx) => val === '' ? idx : null)
+                    .filter(val => val !== null);
+
+                if (emptyIndices.length > 0) {
+                    const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+                    const targetCell = document.querySelector(`.cell[data-index="${randomIndex}"]`);
+                    
+                    running = true;
+                    makeMove(targetCell, randomIndex);
+                }
+            }
+
+            function checkWinner() {
+                let roundWon = false;
+                let winningPattern = null;
+
+                for (let i = 0; i < winPatterns.length; i++) {
+                    const [a, b, c] = winPatterns[i];
+                    if (options[a] && options[a] === options[b] && options[a] === options[c]) {
+                        roundWon = true;
+                        winningPattern = winPatterns[i];
+                        break;
+                    }
+                }
+
+                if (roundWon) {
+                    running = false;
+                    drawWinningLine(winningPattern);
+                    highlightWinningCells(winningPattern);
+                    playSound('win');
+                    triggerConfetti();
+
+                    if (currentPlayer === 'X') {
+                        winsX++;
+                        winsXEl.textContent = winsX;
+                    } else {
+                        winsO++;
+                        winsOEl.textContent = winsO;
+                    }
+
+                    statusMsg.classList.add('blink-victory');
+
+                    if (formatSelect === 'bo3') {
+                        if (winsX === 2 || winsO === 2) {
+                            const champion = winsX === 2 ? 'JOGADOR X' : (modeSelect === 'cpu' ? 'COMPUTADOR' : 'JOGADOR O');
+                            statusMsg.textContent = `🏆 ${champion} É O CAMPEÃO (MD3)!`;
+                        } else if (currentRound < 3) {
+                            statusMsg.textContent = `VITÓRIA DE ${getPlayerName(currentPlayer).toUpperCase()} NA RODADA ${currentRound}!`;
+                            setTimeout(() => {
+                                currentRound++;
+                                initGame();
+                            }, 2000);
+                        } else {
+                            const champion = winsX > winsO ? 'JOGADOR X' : (winsO > winsX ? (modeSelect === 'cpu' ? 'COMPUTADOR' : 'JOGADOR O') : 'EMPATE TÉCNICO');
+                            statusMsg.textContent = champion.includes('EMPATE') ? 'FIM DE JOGO: EMPATE NA MD3!' : `🏆 ${champion} VENCEU A MD3!`;
+                        }
+                    } else {
+                        statusMsg.textContent = `🎉 ${getPlayerName(currentPlayer).toUpperCase()} VENCEU!`;
+                    }
+
+                } else if (!options.includes('')) {
+                    running = false;
+                    playSound('draw');
+                    statusMsg.textContent = 'RODADA EMPATADA!';
+
+                    if (formatSelect === 'bo3' && currentRound < 3) {
+                        setTimeout(() => {
+                            initGame();
+                        }, 2000);
+                    }
+                } else {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    updateStatusText();
+                }
+            }
+
+            function getPlayerName(player) {
+                if (player === 'X') return 'Jogador X';
+                return modeSelect === 'cpu' ? 'Computador' : 'Jogador O';
+            }
+
+            function updateStatusText() {
+                statusMsg.textContent = `VEZ DO ${getPlayerName(currentPlayer).toUpperCase()}`;
+            }
+
+            function updateRoundDisplay() {
+                currentRoundEl.textContent = formatSelect === 'bo3' ? `${currentRound}/3` : '1/1';
+            }
+
+            function highlightWinningCells(pattern) {
+                pattern.forEach(index => {
+                    const cell = cells[index];
+                    cell.classList.add('winner-highlight');
+                });
+            }
+
+            function drawWinningLine(pattern) {
+                const [a, , c] = pattern;
+                const cellA = cells[a];
+                const cellC = cells[c];
+
+                const containerRect = boardContainerEl.getBoundingClientRect();
+                const rectA = cellA.getBoundingClientRect();
+                const rectC = cellC.getBoundingClientRect();
+
+                const x1 = (rectA.left + rectA.width / 2) - containerRect.left;
+                const y1 = (rectA.top + rectA.height / 2) - containerRect.top;
+                const x2 = (rectC.left + rectC.width / 2) - containerRect.left;
+                const y2 = (rectC.top + rectC.height / 2) - containerRect.top;
+
+                const distance = Math.hypot(x2 - x1, y2 - y1);
+                const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+
+                winningLineEl.style.width = `${distance}px`;
+                winningLineEl.style.left = `${x1}px`;
+                winningLineEl.style.top = `${y1}px`;
+                winningLineEl.style.transform = `rotate(${angle}deg)`;
+                winningLineEl.style.opacity = '1';
+            }
+
+            function hideWinningLine() {
+                winningLineEl.style.opacity = '0';
+            }
+
+            function triggerConfetti() {
+                if (typeof confetti === 'function') {
+                    const colors = ['#003366', '#004b93', '#d97706', '#16a34a'];
+
+                    confetti({
+                        particleCount: 65,
+                        angle: 45,
+                        spread: 40,
+                        startVelocity: 75,
+                        origin: { x: 0, y: 0.95 },
+                        colors: colors,
+                        ticks: 350,
+                        gravity: 0.7,
+                        scalar: 0.9
+                    });
+
+                    confetti({
+                        particleCount: 35,
+                        angle: 45,
+                        spread: 30,
+                        startVelocity: 45,
+                        origin: { x: 0, y: 0.95 },
+                        colors: colors,
+                        ticks: 220,
+                        gravity: 0.85,
+                        scalar: 0.65
+                    });
+
+                    confetti({
+                        particleCount: 65,
+                        angle: 135,
+                        spread: 40,
+                        startVelocity: 75,
+                        origin: { x: 1, y: 0.95 },
+                        colors: colors,
+                        ticks: 350,
+                        gravity: 0.7,
+                        scalar: 0.9
+                    });
+
+                    confetti({
+                        particleCount: 35,
+                        angle: 135,
+                        spread: 30,
+                        startVelocity: 45,
+                        origin: { x: 1, y: 0.95 },
+                        colors: colors,
+                        ticks: 220,
+                        gravity: 0.85,
+                        scalar: 0.65
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
