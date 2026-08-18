@@ -12,15 +12,15 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg-color: #f1f4f9;
+            --bg-color: #f4f6f9;
             --azul-unifor: #003366;
-            --azul-destaque: #004b93;
+            --azul-destaque: #0056b3; /* Azul elétrico do botão 'Acessar' */
             --laranja-unifor: #d97706;
             --verde-vitoria: #16a34a;
             --texto-dark: #0f172a;
             --card-bg: #ffffff;
             --cell-bg: #f8fafc;
-            --border-light: #e2e8f0;
+            --border-light: #dbe5f1;
         }
 
         * {
@@ -50,8 +50,8 @@
             max-width: 440px;
             background: var(--card-bg);
             border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0, 51, 102, 0.06);
-            padding: 24px 28px 24px 28px;
+            box-shadow: 0 20px 45px rgba(0, 51, 102, 0.08);
+            padding: 24px 28px;
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -69,7 +69,7 @@
             width: 26px;
             height: 26px;
             border-radius: 50%;
-            background-color: #a0aec0;
+            background-color: #94a3b8;
             color: #ffffff;
             border: none;
             font-size: 0.85rem;
@@ -78,13 +78,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.8;
+            opacity: 0.85;
             transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
         }
 
         .btn-help:hover {
             opacity: 1;
-            background-color: #718096;
+            background-color: var(--azul-destaque);
             transform: scale(1.08);
         }
 
@@ -93,10 +93,11 @@
             top: 34px;
             right: 0;
             width: 290px;
+            max-width: calc(100vw - 40px);
             background-color: #ffffff;
             border: 1px solid var(--border-light);
             border-radius: 14px;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 12px 28px rgba(0, 51, 102, 0.12);
             padding: 0 16px;
             max-height: 0;
             opacity: 0;
@@ -183,7 +184,7 @@
 
         h1 {
             font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            font-size: 1.85rem;
+            font-size: clamp(1.4rem, 5vw, 1.85rem);
             color: var(--azul-unifor);
             font-weight: 900;
             letter-spacing: -0.5px;
@@ -230,19 +231,23 @@
             font-size: 0.85rem;
             outline: none;
             cursor: pointer;
-            transition: border-color 0.2s, background-color 0.2s;
+            transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
             text-overflow: ellipsis;
             white-space: nowrap;
             appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c003366' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c0056b3' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 8px center;
             background-size: 14px;
         }
 
         select:focus, select:hover {
-            border-color: #cbd5e1;
-            background-color: #f1f5f9;
+            border-color: var(--azul-destaque);
+            background-color: #f0f6ff;
+        }
+
+        select:focus {
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15);
         }
 
         /* Painel de Placar Fixo */
@@ -267,7 +272,7 @@
             overflow: hidden;
         }
 
-        .score-box.player-x .label { color: var(--azul-unifor); }
+        .score-box.player-x .label { color: var(--azul-destaque); }
         .score-box.player-o .label { color: var(--laranja-unifor); }
 
         .score-box .label {
@@ -323,7 +328,7 @@
             text-transform: uppercase;
             text-align: center;
             font-weight: 900;
-            font-size: 0.95rem;
+            font-size: clamp(0.8rem, 3.5vw, 0.95rem);
             color: var(--azul-unifor);
             min-height: 2.2em;
             display: flex;
@@ -372,24 +377,32 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3rem;
+            font-size: clamp(2rem, 8vw, 3rem);
             font-weight: 900;
             cursor: pointer;
             user-select: none;
-            transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
             position: relative;
+            /* Otimização para toque mobile */
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .cell:hover:not(.disabled) {
-            background-color: #f1f5f9;
-            border-color: #cbd5e1;
+        /* Hover dinâmico conforme o jogador da vez */
+        .board.turn-x .cell:hover:not(.disabled) {
+            background-color: #f0f6ff;
+            border-color: var(--azul-destaque);
+        }
+
+        .board.turn-o .cell:hover:not(.disabled) {
+            background-color: #fff7ed;
+            border-color: var(--laranja-unifor);
         }
 
         .cell.disabled {
             cursor: not-allowed;
         }
 
-        .cell.x-symbol { color: var(--azul-unifor); }
+        .cell.x-symbol { color: var(--azul-destaque); }
         .cell.o-symbol { color: var(--laranja-unifor); }
 
         .cell.winner-highlight {
@@ -413,11 +426,11 @@
             z-index: 10;
         }
 
-        /* Botão Reiniciar */
+        /* Botão Reiniciar com borda interna fina em #003366 */
         .btn-reset {
             width: 100%;
-            padding: 12px;
-            background-color: var(--azul-unifor);
+            padding: 13px;
+            background-color: var(--azul-destaque);
             color: #ffffff;
             border: none;
             border-radius: 10px;
@@ -425,12 +438,15 @@
             font-size: 0.95rem;
             letter-spacing: 0.8px;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: inset 0 0 0 1.5px #003366, 0 4px 14px rgba(0, 86, 179, 0.3);
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
             white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn-reset:hover {
-            background-color: var(--azul-destaque);
+            background-color: #0056b3;
+            box-shadow: inset 0 0 0 1.5px #003366, 0 6px 18px rgba(0, 86, 179, 0.4);
         }
 
         .btn-reset:active {
@@ -441,14 +457,28 @@
         .footer-year {
             text-align: center;
             font-size: 0.75rem;
-            color: #94a3b8;
+            color: #64748b;
             font-weight: 600;
         }
 
-        /* Responsividade */
-        @media (max-width: 380px) {
+        /* Responsividade para Telas Pequenas e Dispositivos Móveis */
+        @media (max-width: 420px) {
+            body {
+                padding: 12px;
+            }
+
             .container {
-                padding: 20px 16px;
+                padding: 18px 16px;
+                gap: 12px;
+                border-radius: 20px;
+            }
+
+            .board {
+                gap: 8px;
+            }
+
+            .cell {
+                border-radius: 10px;
             }
 
             .score-box .label, .round-box .label {
@@ -456,20 +486,16 @@
             }
 
             .score-box .value {
-                font-size: 1.3rem;
+                font-size: 1.25rem;
             }
 
             .round-box .value {
                 font-size: 1rem;
             }
 
-            .status-msg {
-                font-size: 0.85rem;
-            }
-
             select {
-                font-size: 0.75rem;
-                padding: 6px 18px 6px 6px;
+                font-size: 0.78rem;
+                padding: 6px 20px 6px 6px;
             }
         }
     </style>
@@ -550,7 +576,7 @@
 
         <!-- TABULEIRO E OVERLAY DA LINHA -->
         <div class="board-container">
-            <div class="board" id="board">
+            <div class="board turn-x" id="board">
                 <div class="cell" data-index="0"></div>
                 <div class="cell" data-index="1"></div>
                 <div class="cell" data-index="2"></div>
@@ -601,6 +627,7 @@
             const btnResetEl = document.getElementById('btnReset');
             const winningLineEl = document.getElementById('winningLine');
             const boardContainerEl = document.querySelector('.board-container');
+            const boardEl = document.getElementById('board');
             
             const btnHelpEl = document.getElementById('btnHelp');
             const helpBalloonEl = document.getElementById('helpBalloon');
@@ -680,6 +707,13 @@
             selectModeEl.addEventListener('change', handleConfigChange);
             selectFormatEl.addEventListener('change', handleConfigChange);
 
+            function updateTurnClass() {
+                boardEl.classList.remove('turn-x', 'turn-o');
+                if (running) {
+                    boardEl.classList.add(currentPlayer === 'X' ? 'turn-x' : 'turn-o');
+                }
+            }
+
             function initGame() {
                 options = ['', '', '', '', '', '', '', '', ''];
                 currentPlayer = 'X';
@@ -695,6 +729,7 @@
                 hideWinningLine();
                 updateStatusText();
                 updateRoundDisplay();
+                updateTurnClass();
             }
 
             function handleConfigChange() {
@@ -724,6 +759,7 @@
 
                 if (running && modeSelect === 'cpu' && currentPlayer === 'O') {
                     running = false;
+                    updateTurnClass();
                     statusMsg.textContent = 'COMPUTADOR PENSANDO...';
 
                     setTimeout(() => {
@@ -771,6 +807,7 @@
 
                 if (roundWon) {
                     running = false;
+                    updateTurnClass();
                     drawWinningLine(winningPattern);
                     highlightWinningCells(winningPattern);
                     playSound('win');
@@ -806,6 +843,7 @@
 
                 } else if (!options.includes('')) {
                     running = false;
+                    updateTurnClass();
                     playSound('draw');
                     statusMsg.textContent = 'RODADA EMPATADA!';
 
@@ -817,6 +855,7 @@
                 } else {
                     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
                     updateStatusText();
+                    updateTurnClass();
                 }
             }
 
@@ -870,7 +909,7 @@
 
             function triggerConfetti() {
                 if (typeof confetti === 'function') {
-                    const colors = ['#003366', '#004b93', '#d97706', '#16a34a'];
+                    const colors = ['#003366', '#0056b3', '#d97706', '#16a34a'];
 
                     confetti({
                         particleCount: 65,
