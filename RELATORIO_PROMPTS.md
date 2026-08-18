@@ -349,6 +349,6 @@ Abaixo está o código completo com o ajuste aplicado na função `triggerConfet
 ---
 
 # 💻 CÓDIGO FONTE FINAL
-https://github.com/niclasmn/jogo-da-velha/blob/main/src%2FjogoDaVelha_Unifor.html
+https://github.com/niclasmn/jogo-da-velha/blob/main/src/index.html
 
 *(O código final otimizado reúne todas as 16 iterações de correções de layout, sons via Web Audio API, animações, acessibilidade e responsividade para dispositivos móveis).*
