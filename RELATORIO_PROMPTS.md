@@ -1,7 +1,8 @@
-# 📄 Histórico de Interações — Desenvolvimentos e Refinamentos (UNIFOR)
+# 📄 Relatório Histórico de Interações — Desenvolvimentos e Refinamentos (UNIFOR)
 
 > **Documentação de Engenharia de Prompt e Evolução do Projeto**
-> **Ferramentas de I.A:** Gemini 3.6 Flash e Gemini 3.6 Thinking
+> 
+> **Ferramentas de I.A:** Gemini 3.6 Flash e Gemini 3.6 Thinking  
 > **Projeto:** Aplicação Web Jogo da Velha (HTML5 / CSS3 / JavaScript Vanilla)  
 > **Instituição:** Universidade de Fortaleza (UNIFOR)  
 > **Disciplina:** Requisitos e Modelagem de Sistemas  
