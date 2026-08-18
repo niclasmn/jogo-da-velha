@@ -4,7 +4,7 @@ Projeto desenvolvido para a disciplina de Requisitos e Modelagem de Sistemas T19
 Professor: Marcelo Bezerra de Alcantara
 ## EQUIPE:
 - Nicholas Marques Alves : Matrícula: 2612708
-- Ycaro Vieira Lopes : Matrícula: 2612708
+- Ycaro Vieira Lopes : Matrícula: 2612764
 - Diego Alexander Silva de Araujo : Matrícula: 2612768
 - Charles Targino Pacheco : Matrícula: 2612761
 
